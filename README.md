@@ -12,7 +12,7 @@ Transforma um `<select>` comum em um seletor com busca que abre em um `<dialog>`
 - **Tema Bootstrap opcional** — `select-modal-bootstrap.css` herda as cores e métricas do Bootstrap 5.3.
 - **Para o desenvolvedor** — tipos TypeScript, build ESM/minificado, eventos canceláveis, idiomas e testes.
 
-Abra o [demo.html](demo.html) no navegador para ver todos os exemplos.
+Abra o [index.html](index.html) no navegador para ver todos os exemplos (é também a página publicada no GitHub Pages).
 
 ## Instalação
 
@@ -365,7 +365,7 @@ npm test         # testes de lógica (node:test + jsdom)
 npm run build    # gera dist/ (minificados + ES module)
 ```
 
-O código-fonte é `select-modal.js` (UMD, sem etapa de build para usar). Rode `npm run build` depois de alterá-lo para atualizar a pasta `dist/`. Os testes cobrem comportamento em DOM simulado; o visual deve ser conferido no `demo.html`. Histórico de versões em [CHANGELOG.md](CHANGELOG.md).
+O código-fonte é `select-modal.js` (UMD, sem etapa de build para usar). Rode `npm run build` depois de alterá-lo para atualizar a pasta `dist/`. Os testes cobrem comportamento em DOM simulado; o visual deve ser conferido no `index.html`. Histórico de versões em [CHANGELOG.md](CHANGELOG.md).
 
 ## Compatibilidade
 
@@ -384,4 +384,4 @@ Navegadores atuais: Chrome/Edge 123+, Firefox 120+, Safari 17.5+ (requisitos: `<
 | `select-modal-bootstrap.css` | não | Tema para páginas com Bootstrap 5.3+. |
 | `select-modal.d.ts` | não | Tipos TypeScript. |
 | `dist/` | não | Versões minificadas (`.min.js`, `.min.css`) e ES module (`.esm.js`). |
-| `demo.html` | não | Página de demonstração. |
+| `index.html` | não | Página de demonstração (GitHub Pages). |

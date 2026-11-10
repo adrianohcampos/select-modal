@@ -3,7 +3,7 @@
  * Rodar: npm test
  *
  * O jsdom não implementa <dialog>.showModal() nem layout, então estes testes cobrem
- * comportamento (seleção, busca, eventos, API) — não o visual. Para o visual, abra demo.html.
+ * comportamento (seleção, busca, eventos, API) — não o visual. Para o visual, abra index.html.
  */
 'use strict';
 

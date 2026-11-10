@@ -1,0 +1,709 @@
+/*!
+ * SelectModal v2.1.0 — estilos base (sem dependências).
+ *
+ * Tudo fica sob as classes .select-modal-*; nada vaza para a página.
+ * Personalize com as variáveis públicas --sm-* (veja o README), por exemplo:
+ *   :root { --sm-accent: #7c3aed; --sm-radius: 6px; }
+ * O tema claro/escuro acompanha o `color-scheme` da página.
+ */
+
+.select-modal-wrap,
+.select-modal-dialog {
+    --_font: var(--sm-font, inherit);
+    --_font-size: var(--sm-font-size, .9375rem);
+    --_bg: var(--sm-bg, light-dark(#fff, #17191e));
+    --_color: var(--sm-color, light-dark(#1b1f27, #e8eaef));
+    --_muted: var(--sm-muted, light-dark(#667085, #9aa3b5));
+    --_border: var(--sm-border, light-dark(#d4d9e1, #363b47));
+    --_accent: var(--sm-accent, light-dark(#2563eb, #7aa5ff));
+    --_accent-contrast: var(--sm-accent-contrast, light-dark(#fff, #0c1322));
+    --_invalid: var(--sm-invalid, light-dark(#d92d20, #ff7b72));
+    --_valid: var(--sm-valid, light-dark(#16803c, #4ade80));
+    --_hover: var(--sm-hover, color-mix(in srgb, var(--_color) 7%, transparent));
+    --_selected: var(--sm-selected, color-mix(in srgb, var(--_accent) 12%, transparent));
+    --_selected-color: var(--sm-selected-color, var(--_accent));
+    --_focus-border: var(--sm-focus-border, var(--_accent));
+    --_ring: var(--sm-ring, 0 0 0 3px color-mix(in srgb, var(--_accent) 25%, transparent));
+    --_radius: var(--sm-radius, .625rem);
+    --_radius-lg: var(--sm-radius-lg, 1rem);
+    --_pad-y: var(--sm-padding-y, .5625rem);
+    --_pad-x: var(--sm-padding-x, .8125rem);
+    --_line-height: var(--sm-line-height, 1.4);
+    --_shadow: var(--sm-shadow, 0 24px 60px -12px rgb(10 20 40 / .35), 0 2px 6px rgb(10 20 40 / .12));
+    --_backdrop: var(--sm-backdrop, rgb(12 16 24 / .5));
+    --_speed: var(--sm-speed, .18s);
+
+    --_i-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    --_i-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 8.5 3 3 6-7'/%3E%3C/svg%3E");
+    --_i-close: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round'%3E%3Cpath d='M4 4l8 8M12 4l-8 8'/%3E%3C/svg%3E");
+    --_i-search: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round'%3E%3Ccircle cx='7' cy='7' r='4.5'/%3E%3Cpath d='m10.5 10.5 3 3'/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------------ campo */
+
+.select-modal-wrap {
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    /* O <select> real continua no DOM (formulário, validação), só não aparece. */
+    & > select.select-modal-native {
+        position: absolute !important;
+        inset: auto auto 0 0 !important;
+        width: 1px !important;
+        height: 1px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        overflow: hidden !important;
+        clip-path: inset(50%) !important;
+        white-space: nowrap !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+}
+
+.select-modal-toggle {
+    appearance: none;
+    position: relative;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: var(--_pad-y) calc(var(--_pad-x) + 1.5rem) var(--_pad-y) var(--_pad-x);
+    border: 1px solid var(--_border);
+    border-radius: var(--_radius);
+    background: var(--_bg);
+    color: var(--_color);
+    font: inherit;
+    font-family: var(--_font);
+    font-size: var(--_font-size);
+    line-height: var(--_line-height);
+    text-align: start;
+    text-transform: none;
+    letter-spacing: normal;
+    cursor: pointer;
+    transition: border-color var(--_speed) ease, box-shadow var(--_speed) ease;
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset-inline-end: calc(var(--_pad-x) - .125rem);
+        top: 50%;
+        width: 1rem;
+        height: 1rem;
+        translate: 0 -50%;
+        background: var(--_muted);
+        mask: var(--_i-chevron) center / contain no-repeat;
+        transition: rotate var(--_speed) ease;
+    }
+
+    &[aria-expanded="true"]::after { rotate: 180deg; }
+
+    &:hover:not(:disabled) { border-color: color-mix(in srgb, var(--_border) 55%, var(--_color)); }
+
+    &:focus-visible,
+    &[aria-expanded="true"] {
+        outline: 0;
+        border-color: var(--_focus-border);
+        box-shadow: var(--_ring);
+    }
+
+    &.is-placeholder { color: var(--_muted); }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: .6;
+        background: color-mix(in srgb, var(--_bg) 92%, var(--_color));
+    }
+
+    &.is-valid { border-color: var(--_valid); }
+
+    &.is-invalid {
+        --_focus-border: var(--_invalid);
+        --_ring: 0 0 0 3px color-mix(in srgb, var(--_invalid) 22%, transparent);
+        border-color: var(--_invalid);
+    }
+
+    &.select-modal-sm {
+        --_pad-y: .3125rem;
+        --_pad-x: .625rem;
+        font-size: calc(var(--_font-size) * .9);
+        border-radius: calc(var(--_radius) * .8);
+    }
+
+    &.select-modal-lg {
+        --_pad-y: .75rem;
+        --_pad-x: 1rem;
+        font-size: calc(var(--_font-size) * 1.15);
+    }
+}
+
+.select-modal-feedback {
+    margin-top: .25rem;
+    color: var(--_invalid);
+    font-family: var(--_font);
+    font-size: .8125rem;
+    line-height: 1.4;
+
+    &[hidden] { display: none; }
+}
+
+.select-modal-value {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------- dialog */
+
+/* Trava a rolagem da página sem "pulo" da barra de rolagem. */
+html:has(dialog.select-modal-dialog[open]) {
+    overflow: hidden;
+    scrollbar-gutter: stable;
+}
+
+.select-modal-dialog {
+    box-sizing: border-box;
+    width: min(var(--sm-width, 40rem), 100vw - 2rem);
+    max-width: none;
+    max-height: min(44rem, 100dvh - 12vh - 1rem);
+    margin: 12vh auto auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--_radius-lg);
+    overflow: hidden;
+    background: var(--_bg);
+    color: var(--_color);
+    box-shadow: var(--_shadow);
+    font-family: var(--_font);
+    font-size: var(--_font-size);
+    line-height: var(--_line-height);
+    text-align: start;
+
+    /* Animação de entrada e saída só com CSS. */
+    opacity: 0;
+    translate: 0 .75rem;
+    scale: .98;
+    transition:
+        opacity var(--_speed) ease,
+        translate var(--_speed) ease,
+        scale var(--_speed) ease,
+        overlay var(--_speed) allow-discrete,
+        display var(--_speed) allow-discrete;
+
+    &[open] {
+        display: flex;
+        opacity: 1;
+        translate: 0 0;
+        scale: 1;
+
+        @starting-style {
+            opacity: 0;
+            translate: 0 .75rem;
+            scale: .98;
+        }
+    }
+
+    &::backdrop {
+        background: var(--_backdrop);
+        opacity: 0;
+        transition:
+            opacity var(--_speed) ease,
+            overlay var(--_speed) allow-discrete,
+            display var(--_speed) allow-discrete;
+    }
+
+    &[open]::backdrop {
+        opacity: 1;
+
+        @starting-style { opacity: 0; }
+    }
+
+    *,
+    *::before,
+    *::after { box-sizing: border-box; }
+
+    [hidden] { display: none !important; }
+
+    button {
+        appearance: none;
+        margin: 0;
+        font: inherit;
+        text-transform: none;
+        letter-spacing: normal;
+        cursor: pointer;
+
+        &:disabled { cursor: not-allowed; opacity: .5; }
+    }
+}
+
+.select-modal-panel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.select-modal-header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: 1rem 1rem .25rem 1.25rem;
+}
+
+.select-modal-title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: inherit;
+    font-size: 1.0625em;
+    font-weight: 650;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.select-modal-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: .5rem;
+}
+
+.select-modal-btn {
+    padding: .4375rem .875rem;
+    border: 1px solid var(--_border);
+    border-radius: var(--_radius);
+    background: transparent;
+    color: var(--_color);
+    font-size: .875em;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    transition: background-color var(--_speed) ease, border-color var(--_speed) ease, filter var(--_speed) ease;
+
+    &:hover:not(:disabled) { background: var(--_hover); }
+
+    &:focus-visible {
+        outline: 0;
+        border-color: var(--_focus-border);
+        box-shadow: var(--_ring);
+    }
+
+    &.select-modal-add,
+    &.select-modal-done {
+        border-color: var(--_accent);
+        background: var(--_accent);
+        color: var(--_accent-contrast);
+
+        &:hover:not(:disabled) {
+            background: var(--_accent);
+            filter: brightness(1.08);
+        }
+    }
+}
+
+.select-modal-close {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--_muted);
+    transition: background-color var(--_speed) ease, color var(--_speed) ease;
+
+    &::before {
+        content: "";
+        width: 1.125rem;
+        height: 1.125rem;
+        background: currentColor;
+        mask: var(--_i-close) center / contain no-repeat;
+    }
+
+    &:hover {
+        background: var(--_hover);
+        color: var(--_color);
+    }
+
+    &:focus-visible {
+        outline: 0;
+        box-shadow: var(--_ring);
+    }
+}
+
+.select-modal-search-box {
+    position: relative;
+    padding: .625rem 1.25rem .5rem;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset-inline-start: 2rem;
+        top: 50%;
+        width: 1.0625rem;
+        height: 1.0625rem;
+        translate: 0 -45%;
+        background: var(--_muted);
+        mask: var(--_i-search) center / contain no-repeat;
+        pointer-events: none;
+    }
+}
+
+.select-modal-search {
+    appearance: none;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: .625rem .875rem .625rem 2.5rem;
+    border: 1px solid var(--_border);
+    border-radius: var(--_radius);
+    background: var(--_bg);
+    color: var(--_color);
+    font: inherit;
+    /* 16px evita o zoom automático do iOS ao focar. */
+    font-size: max(1rem, 1em);
+    line-height: 1.4;
+    transition: border-color var(--_speed) ease, box-shadow var(--_speed) ease;
+
+    &::placeholder {
+        color: var(--_muted);
+        opacity: 1;
+    }
+
+    &::-webkit-search-cancel-button { cursor: pointer; }
+
+    &:focus {
+        outline: 0;
+        border-color: var(--_focus-border);
+        box-shadow: var(--_ring);
+    }
+}
+
+.select-modal-list {
+    flex: 1;
+    min-height: 0;
+    padding: .25rem .75rem .75rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: 2.25rem .75rem;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--_muted) 55%, transparent) transparent;
+
+    &:focus { outline: 0; }
+    &:focus-visible .select-modal-option.is-active { box-shadow: inset 0 0 0 2px var(--_focus-border); }
+}
+
+.select-modal-group {
+    position: sticky;
+    top: -.25rem;
+    z-index: 1;
+    padding: .75rem .625rem .375rem;
+    background: var(--_bg);
+    color: var(--_muted);
+    font-size: .75em;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.select-modal-option {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 2.5rem;
+    padding: .5rem .625rem;
+    border-radius: calc(var(--_radius) * .8);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &.is-active { background: var(--_hover); }
+
+    &[aria-selected="true"] {
+        color: var(--_selected-color);
+        font-weight: 600;
+    }
+
+    &[aria-selected="true"].is-active { background: var(--_selected); }
+
+    &[aria-disabled="true"] {
+        cursor: not-allowed;
+        opacity: .45;
+    }
+}
+
+.select-modal-text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.select-modal-subtext {
+    display: block;
+    color: var(--_muted);
+    font-size: .85em;
+    font-weight: 400;
+}
+
+/* Seleção única: marca de "check" no fim da linha. */
+.select-modal-check {
+    flex-shrink: 0;
+    order: 2;
+    width: 1.125rem;
+    height: 1.125rem;
+    background: currentColor;
+    mask: var(--_i-check) center / contain no-repeat;
+    opacity: 0;
+
+    [aria-selected="true"] > & { opacity: 1; }
+}
+
+/* Seleção múltipla: caixa de seleção no início da linha. */
+.select-modal-dialog[data-multiple] .select-modal-check {
+    order: 0;
+    border: 1.5px solid var(--_border);
+    border-radius: .3125rem;
+    background: transparent;
+    mask: none;
+    opacity: 1;
+    transition: background-color var(--_speed) ease, border-color var(--_speed) ease;
+
+    [aria-selected="true"] > & {
+        border-color: var(--_accent);
+        background: var(--_accent);
+
+        &::after {
+            content: "";
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: var(--_accent-contrast);
+            mask: var(--_i-check) center / 85% no-repeat;
+        }
+    }
+}
+
+.select-modal-empty {
+    padding: 2rem 1.25rem 2.25rem;
+    color: var(--_muted);
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.select-modal-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .5rem;
+    padding: .75rem 1.25rem;
+    border-top: 1px solid var(--_border);
+}
+
+/* O contador também é o filtro "mostrar só os selecionados". */
+.select-modal-dialog .select-modal-count {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-inline-end: auto;
+    padding: .25rem 0;
+    border: 0;
+    border-radius: .25rem;
+    background: transparent;
+    color: var(--_muted);
+    font-size: .875em;
+    text-align: start;
+    text-decoration: underline dotted;
+    text-underline-offset: .2em;
+
+    &:empty { visibility: hidden; }
+    &:disabled { opacity: 1; text-decoration: none; }
+    &:hover:not(:disabled) { color: var(--_color); }
+    &[aria-pressed="true"] { color: var(--_accent); font-weight: 600; text-decoration-style: solid; }
+    &:focus-visible { outline: 0; box-shadow: var(--_ring); }
+}
+
+/* Região de anúncio para leitores de tela. */
+.select-modal-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.select-modal-mark {
+    padding: 0;
+    border-radius: .1875rem;
+    background: color-mix(in srgb, var(--_accent) 22%, transparent);
+    color: inherit;
+    font-weight: 650;
+}
+
+.select-modal-icon,
+.select-modal-image {
+    flex-shrink: 0;
+    width: 1.5rem;
+    text-align: center;
+}
+
+.select-modal-image {
+    height: 1.5rem;
+    border-radius: .25rem;
+    object-fit: cover;
+}
+
+.select-modal-option.is-create {
+    color: var(--_accent);
+    font-weight: 600;
+
+    &::before {
+        content: "+";
+        width: 1.125rem;
+        font-size: 1.15em;
+        line-height: 1;
+        text-align: center;
+    }
+}
+
+/* Limite de seleções atingido. */
+.select-modal-option.is-blocked {
+    cursor: not-allowed;
+    opacity: .45;
+}
+
+/* Carregando dados remotos: o ícone da busca vira um spinner. */
+.select-modal-dialog[data-loading] .select-modal-search-box::before {
+    border: 2px solid color-mix(in srgb, var(--_muted) 35%, transparent);
+    border-top-color: var(--_accent);
+    border-radius: 50%;
+    background: none;
+    mask: none;
+    animation: select-modal-spin .7s linear infinite;
+}
+
+@keyframes select-modal-spin {
+    to { rotate: 360deg; }
+}
+
+/* ------------------------------------------------- modo dropdown (desktop) */
+
+.select-modal-dialog[data-mode="dropdown"] {
+    position: fixed;
+    inset: var(--sm-dd-top, auto) auto var(--sm-dd-bottom, auto) var(--sm-dd-left, 0);
+    width: var(--sm-dd-width, 20rem);
+    max-height: min(26rem, var(--sm-dd-max, 26rem));
+    margin: 0;
+    border: 1px solid var(--_border);
+    border-radius: var(--_radius);
+    box-shadow: 0 12px 32px -8px rgb(10 20 40 / .28), 0 2px 6px rgb(10 20 40 / .1);
+    translate: 0 -.25rem;
+    scale: 1;
+
+    &[open] {
+        translate: 0 0;
+
+        @starting-style {
+            translate: 0 -.25rem;
+            scale: 1;
+        }
+    }
+
+    &::backdrop { background: transparent; }
+
+    .select-modal-title,
+    .select-modal-close { display: none; }
+
+    .select-modal-header {
+        justify-content: flex-end;
+        padding: .5rem .5rem 0;
+
+        &:has(.select-modal-actions[hidden]) { display: none; }
+    }
+
+    .select-modal-search-box {
+        padding: .5rem .5rem .25rem;
+
+        &::before { inset-inline-start: 1.25rem; }
+    }
+
+    .select-modal-search { padding-block: .4375rem; }
+    .select-modal-list { padding: .25rem .5rem .5rem; }
+    .select-modal-option { min-height: 2.25rem; padding-block: .375rem; }
+    .select-modal-footer { padding: .5rem; }
+}
+
+/* Telas pequenas: vira uma "bottom sheet". */
+@media (max-width: 36rem) {
+    .select-modal-dialog {
+        width: 100vw;
+        height: min(85dvh, 44rem, var(--sm-vv-height, 100dvh) - .5rem);
+        max-height: none;
+        /* Sobe junto com o teclado virtual. */
+        margin: auto 0 var(--sm-vv-bottom, 0px);
+        border-radius: var(--_radius-lg) var(--_radius-lg) 0 0;
+        translate: 0 100%;
+        scale: 1;
+
+        &[open] {
+            @starting-style {
+                translate: 0 100%;
+                scale: 1;
+            }
+        }
+    }
+
+    /* Alça: arrastar o cabeçalho para baixo fecha. */
+    .select-modal-header {
+        position: relative;
+        padding-top: 1.375rem;
+        touch-action: none;
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: .5rem;
+            left: 50%;
+            width: 2.25rem;
+            height: .25rem;
+            translate: -50% 0;
+            border-radius: 1rem;
+            background: color-mix(in srgb, var(--_muted) 45%, transparent);
+        }
+    }
+
+    .select-modal-option { min-height: 2.875rem; }
+
+    .select-modal-footer { padding-bottom: max(.75rem, env(safe-area-inset-bottom)); }
+
+    .select-modal-footer .select-modal-btn { padding-block: .625rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .select-modal-wrap,
+    .select-modal-dialog { --_speed: 0s; }
+
+    .select-modal-dialog[data-loading] .select-modal-search-box::before { animation-duration: 2s; }
+}
+
+@media (forced-colors: active) {
+    .select-modal-option.is-active { outline: 2px solid Highlight; outline-offset: -2px; }
+    .select-modal-mark { background: Mark; color: MarkText; }
+    .select-modal-toggle::after,
+    .select-modal-check,
+    .select-modal-close::before,
+    .select-modal-search-box::before { background: CanvasText; }
+}

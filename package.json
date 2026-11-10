@@ -1,0 +1,46 @@
+{
+  "name": "select-modal",
+  "version": "2.1.0",
+  "description": "Transforma um <select> em um seletor com busca dentro de um <dialog> nativo. Sem dependências.",
+  "license": "MIT",
+  "author": "Adriano Campos",
+  "main": "select-modal.js",
+  "module": "dist/select-modal.esm.js",
+  "types": "select-modal.d.ts",
+  "style": "select-modal.css",
+  "unpkg": "dist/select-modal.min.js",
+  "jsdelivr": "dist/select-modal.min.js",
+  "exports": {
+    ".": {
+      "types": "./select-modal.d.ts",
+      "import": "./dist/select-modal.esm.js",
+      "require": "./select-modal.js"
+    },
+    "./select-modal.css": "./select-modal.css",
+    "./select-modal-bootstrap.css": "./select-modal-bootstrap.css",
+    "./dist/*": "./dist/*"
+  },
+  "files": [
+    "select-modal.js",
+    "select-modal.d.ts",
+    "select-modal.css",
+    "select-modal-bootstrap.css",
+    "dist"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test"
+  },
+  "keywords": [
+    "select",
+    "dialog",
+    "modal",
+    "picker",
+    "vanilla-js",
+    "bootstrap"
+  ],
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "jsdom": "^25.0.0"
+  }
+}

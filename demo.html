@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SelectModal — demo</title>
+
+    <!-- Bootstrap é OPCIONAL: só é ligado pelo botão "Bootstrap" desta página. -->
+    <link id="css-bootstrap" rel="stylesheet" disabled
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="select-modal.css">
+    <link id="css-sm-bootstrap" rel="stylesheet" href="select-modal-bootstrap.css" disabled>
+
+    <script>
+        // Estado da página (tema e modo Bootstrap) fica na URL: demo.html?ui=bootstrap&theme=dark
+        (function () {
+            var params = new URLSearchParams(location.search);
+            var root = document.documentElement;
+            if (params.get('ui') === 'bootstrap') {
+                root.dataset.ui = 'bootstrap';
+                document.getElementById('css-bootstrap').disabled = false;
+                document.getElementById('css-sm-bootstrap').disabled = false;
+            }
+            var theme = params.get('theme');
+            if (theme === 'dark' || theme === 'light') {
+                root.dataset.theme = theme;
+                root.dataset.bsTheme = theme;
+            } else if (matchMedia('(prefers-color-scheme: dark)').matches) {
+                root.dataset.bsTheme = 'dark';
+            }
+        })();
+    </script>
+
+    <style>
+        /* Estilos apenas desta página de demonstração. */
+        :root { color-scheme: light dark; }
+        :root[data-theme="light"] { color-scheme: light; }
+        :root[data-theme="dark"] { color-scheme: dark; }
+
+        html:not([data-ui="bootstrap"]) body {
+            margin: 0;
+            background: light-dark(#f4f6fa, #0f1115);
+            color: light-dark(#1b1f27, #e8eaef);
+            font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .demo {
+            box-sizing: border-box;
+            max-width: 60rem;
+            margin: 0 auto;
+            padding: 2rem 1rem 4rem;
+        }
+        .demo-top {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .75rem 1rem;
+            margin-bottom: 2rem;
+        }
+        .demo-top h1 { flex: 1 1 16rem; margin: 0; font-size: 1.75rem; }
+        .demo-top p { flex-basis: 100%; margin: 0; opacity: .75; }
+        .demo-switch { display: flex; gap: .5rem; }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+            gap: 1rem;
+        }
+        .demo-card {
+            min-width: 0;
+            padding: 1.25rem;
+            border: 1px solid light-dark(#dfe3ea, #2a2e38);
+            border-radius: 1rem;
+            background: light-dark(#fff, #17191e);
+        }
+        .demo-card h2 { margin: 0 0 .25rem; font-size: 1.05rem; }
+        .demo-card p { margin: 0 0 1rem; font-size: .875rem; opacity: .75; }
+        .demo-card label { display: block; margin-bottom: .375rem; font-size: .875rem; font-weight: 600; }
+        .demo-card .select-modal-wrap + label,
+        .demo-card .demo-row { margin-top: .875rem; }
+        .demo-row { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .demo-wide { grid-column: 1 / -1; }
+        .demo-btn {
+            padding: .5rem .875rem;
+            border: 1px solid light-dark(#d4d9e1, #363b47);
+            border-radius: .625rem;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            font-size: .875rem;
+            cursor: pointer;
+        }
+        .demo-btn:hover { background: light-dark(#eef1f6, #22262f); }
+        .demo-btn[aria-pressed="true"] {
+            border-color: light-dark(#2563eb, #7aa5ff);
+            color: light-dark(#2563eb, #7aa5ff);
+        }
+        .demo-log {
+            height: 9rem;
+            margin: 0;
+            padding: .75rem;
+            overflow: auto;
+            border-radius: .625rem;
+            background: light-dark(#f4f6fa, #0f1115);
+            font: .8125rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+            white-space: pre-wrap;
+        }
+        .demo-dialog {
+            width: min(26rem, 100vw - 2rem);
+            padding: 1.5rem;
+            border: 0;
+            border-radius: 1rem;
+            background: light-dark(#fff, #17191e);
+            color: inherit;
+        }
+        .demo-dialog::backdrop { background: rgb(12 16 24 / .5); }
+        code { font-size: .875em; }
+    </style>
+</head>
+<body>
+<main class="demo">
+    <header class="demo-top">
+        <h1>SelectModal</h1>
+        <div class="demo-switch">
+            <button type="button" class="demo-btn" id="toggle-ui" aria-pressed="false">Bootstrap</button>
+            <button type="button" class="demo-btn" id="toggle-theme">Tema</button>
+        </div>
+        <p>
+            Um <code>&lt;select&gt;</code> que abre em um <code>&lt;dialog&gt;</code> nativo com busca.
+            Sem jQuery, sem Bootstrap. O botão <strong>Bootstrap</strong> recarrega esta página com
+            <code>bootstrap.css</code> + <code>select-modal-bootstrap.css</code>.
+        </p>
+    </header>
+
+    <div class="demo-grid">
+        <section class="demo-card">
+            <h2>Básico</h2>
+            <p>Basta a classe <code>select-modal</code>.</p>
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado" class="select-modal" title="Selecione um estado">
+                <option value=""></option>
+                <option value="AC">Acre</option>
+                <option value="AL">Alagoas</option>
+                <option value="AP">Amapá</option>
+                <option value="AM">Amazonas</option>
+                <option value="BA">Bahia</option>
+                <option value="CE">Ceará</option>
+                <option value="DF">Distrito Federal</option>
+                <option value="ES">Espírito Santo</option>
+                <option value="GO">Goiás</option>
+                <option value="MA">Maranhão</option>
+                <option value="MT">Mato Grosso</option>
+                <option value="MS">Mato Grosso do Sul</option>
+                <option value="MG">Minas Gerais</option>
+                <option value="PA">Pará</option>
+                <option value="PB">Paraíba</option>
+                <option value="PR">Paraná</option>
+                <option value="PE">Pernambuco</option>
+                <option value="PI">Piauí</option>
+                <option value="RJ">Rio de Janeiro</option>
+                <option value="RN">Rio Grande do Norte</option>
+                <option value="RS">Rio Grande do Sul</option>
+                <option value="RO">Rondônia</option>
+                <option value="RR">Roraima</option>
+                <option value="SC">Santa Catarina</option>
+                <option value="SP" selected>São Paulo</option>
+                <option value="SE">Sergipe</option>
+                <option value="TO">Tocantins</option>
+            </select>
+        </section>
+
+        <section class="demo-card">
+            <h2>Grupos, subtexto e limpar</h2>
+            <p><code>&lt;optgroup&gt;</code>, <code>data-subtext</code> e <code>data-allow-clear</code>.</p>
+            <label for="cidade">Cidade</label>
+            <select id="cidade" class="select-modal" title="Selecione uma cidade" data-allow-clear>
+                <option value=""></option>
+                <optgroup label="Sudeste">
+                    <option value="sao" data-subtext="São Paulo · 11,4 mi hab.">São Paulo</option>
+                    <option value="rio" data-subtext="Rio de Janeiro · 6,2 mi hab.">Rio de Janeiro</option>
+                    <option value="bhz" data-subtext="Minas Gerais · 2,3 mi hab.">Belo Horizonte</option>
+                    <option value="vix" data-subtext="Espírito Santo" disabled>Vitória (indisponível)</option>
+                </optgroup>
+                <optgroup label="Sul">
+                    <option value="cwb" data-subtext="Paraná · 1,8 mi hab.">Curitiba</option>
+                    <option value="poa" data-subtext="Rio Grande do Sul · 1,3 mi hab.">Porto Alegre</option>
+                    <option value="fln" data-subtext="Santa Catarina · 0,5 mi hab.">Florianópolis</option>
+                </optgroup>
+                <optgroup label="Nordeste">
+                    <option value="ssa" data-subtext="Bahia · 2,4 mi hab.">Salvador</option>
+                    <option value="rec" data-subtext="Pernambuco · 1,5 mi hab.">Recife</option>
+                    <option value="for" data-subtext="Ceará · 2,4 mi hab.">Fortaleza</option>
+                </optgroup>
+            </select>
+        </section>
+
+        <section class="demo-card">
+            <h2>Múltiplo</h2>
+            <p>
+                <code>multiple</code> + <code>data-select-all</code> + <code>data-max-selections="5"</code>.
+                Clique no contador para ver só os selecionados.
+            </p>
+            <label for="skills">Tecnologias</label>
+            <select id="skills" class="select-modal" multiple title="Selecione as tecnologias"
+                    data-select-all data-max-selections="5"
+                    data-count-selected-text="{0} tecnologias">
+                <option value="html" selected>HTML</option>
+                <option value="css" selected>CSS</option>
+                <option value="js">JavaScript</option>
+                <option value="ts">TypeScript</option>
+                <option value="php">PHP</option>
+                <option value="py">Python</option>
+                <option value="go">Go</option>
+                <option value="rs">Rust</option>
+                <option value="sql">SQL</option>
+            </select>
+        </section>
+
+        <section class="demo-card">
+            <h2>Ação "novo"</h2>
+            <p>
+                Opção com <code>data-select-modal-action</code> vira botão. Digite um nome que não
+                existe e pressione <kbd>Enter</kbd>.
+            </p>
+            <label for="cliente">Cliente</label>
+            <select id="cliente" class="select-modal" title="Selecione um cliente">
+                <option value=""></option>
+                <option value="add" data-select-modal-action>+ Novo cliente</option>
+                <option value="1">Ana Souza</option>
+                <option value="2">Bruno Lima</option>
+                <option value="3">Carla Mendes</option>
+            </select>
+        </section>
+
+        <section class="demo-card">
+            <h2>Modo dropdown</h2>
+            <p>
+                <code>data-mode="dropdown"</code>: lista ancorada ao campo no desktop; no celular continua
+                como modal. Foque o campo e digite uma letra.
+            </p>
+            <label for="prioridade">Prioridade</label>
+            <select id="prioridade" class="select-modal" data-mode="dropdown" title="Selecione a prioridade">
+                <option value=""></option>
+                <option value="1">Baixa</option>
+                <option value="2">Média</option>
+                <option value="3">Alta</option>
+                <option value="4">Urgente</option>
+                <option value="5">Crítica</option>
+            </select>
+        </section>
+
+        <section class="demo-card">
+            <h2>Dados remotos</h2>
+            <p>
+                Opção <code>source</code> (função ou URL). Aqui uma API simulada com 400&nbsp;ms de atraso
+                e mínimo de 2 caracteres.
+            </p>
+            <label for="usuario">Usuário</label>
+            <select id="usuario" title="Buscar usuário">
+                <option value=""></option>
+            </select>
+        </section>
+
+        <section class="demo-card">
+            <h2>Criar digitando</h2>
+            <p><code>data-allow-create</code>: digite algo que não existe e pressione <kbd>Enter</kbd>.</p>
+            <label for="tags">Etiquetas</label>
+            <select id="tags" class="select-modal" multiple data-allow-create title="Adicionar etiquetas"
+                    data-max-selected-labels="3">
+                <option selected>urgente</option>
+                <option>financeiro</option>
+                <option>suporte</option>
+            </select>
+        </section>
+
+        <section class="demo-card">
+            <h2>Imagens e conteúdo próprio</h2>
+            <p><code>data-image</code> / <code>data-icon</code> na opção, ou a função <code>renderOption</code>.</p>
+            <label for="membro">Responsável</label>
+            <select id="membro" class="select-modal" title="Selecione o responsável">
+                <option value=""></option>
+                <option value="ana" data-subtext="Design">Ana Souza</option>
+                <option value="bruno" data-subtext="Engenharia">Bruno Lima</option>
+                <option value="carla" data-subtext="Produto">Carla Mendes</option>
+                <option value="diego" data-subtext="Engenharia">Diego Rocha</option>
+            </select>
+            <label for="cor">Cor (renderOption)</label>
+            <select id="cor" title="Selecione uma cor">
+                <option value=""></option>
+                <option value="#2563eb">Azul</option>
+                <option value="#16a34a">Verde</option>
+                <option value="#dc2626">Vermelho</option>
+                <option value="#d97706">Âmbar</option>
+            </select>
+        </section>
+
+        <section class="demo-card">
+            <h2>Lista grande</h2>
+            <p>20.000 opções: a lista é desenhada aos poucos conforme a rolagem.</p>
+            <label for="grande">Produto</label>
+            <select id="grande" class="select-modal" title="Selecione um produto"></select>
+        </section>
+
+        <section class="demo-card">
+            <h2>Validação de formulário</h2>
+            <p><code>required</code> funciona com a validação nativa.</p>
+            <form id="form-demo">
+                <label for="plano">Plano</label>
+                <select id="plano" name="plano" class="select-modal" required title="Escolha um plano"
+                        data-live-search="false">
+                    <option value=""></option>
+                    <option value="free">Gratuito</option>
+                    <option value="pro">Profissional</option>
+                    <option value="team">Equipe</option>
+                </select>
+                <div class="demo-row">
+                    <button type="submit" class="demo-btn">Enviar</button>
+                    <button type="reset" class="demo-btn">Limpar</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="demo-card">
+            <h2>Tamanhos e desabilitado</h2>
+            <p><code>data-size="sm|lg"</code> e <code>disabled</code>.</p>
+            <label for="size-sm">Pequeno</label>
+            <select id="size-sm" class="select-modal" data-size="sm">
+                <option>Opção A</option><option>Opção B</option><option>Opção C</option>
+            </select>
+            <label for="size-lg">Grande</label>
+            <select id="size-lg" class="select-modal" data-size="lg">
+                <option>Opção A</option><option>Opção B</option><option>Opção C</option>
+            </select>
+            <label for="off">Desabilitado</label>
+            <select id="off" class="select-modal" disabled>
+                <option>Não disponível</option>
+            </select>
+        </section>
+
+        <section class="demo-card">
+            <h2>API JavaScript</h2>
+            <p><code>SelectModal.get(el)</code> devolve a instância.</p>
+            <label for="api">Fruta</label>
+            <select id="api" title="Selecione uma fruta">
+                <option value=""></option>
+                <option value="maca">Maçã</option>
+                <option value="banana">Banana</option>
+                <option value="uva">Uva</option>
+            </select>
+            <div class="demo-row">
+                <button type="button" class="demo-btn" data-api="open">open()</button>
+                <button type="button" class="demo-btn" data-api="val">val('uva')</button>
+                <button type="button" class="demo-btn" data-api="add">+ opção</button>
+                <button type="button" class="demo-btn" data-api="toggle">disabled</button>
+                <button type="button" class="demo-btn" data-api="destroy">destroy()</button>
+            </div>
+            <div class="demo-row">
+                <button type="button" class="demo-btn" data-locale="pt-BR">locale('pt-BR')</button>
+                <button type="button" class="demo-btn" data-locale="en">locale('en')</button>
+                <button type="button" class="demo-btn" data-locale="es">locale('es')</button>
+            </div>
+        </section>
+
+        <section class="demo-card">
+            <h2>Dentro de outro dialog</h2>
+            <p>O seletor empilha por cima de modais já abertos.</p>
+            <button type="button" class="demo-btn" id="open-dialog">Abrir dialog</button>
+            <dialog class="demo-dialog" id="outer-dialog">
+                <h2 style="margin-top:0">Novo pedido</h2>
+                <label for="produto">Produto</label>
+                <select id="produto" class="select-modal" title="Selecione um produto">
+                    <option value=""></option>
+                    <option>Notebook</option>
+                    <option>Monitor</option>
+                    <option>Teclado</option>
+                    <option>Mouse</option>
+                </select>
+                <div class="demo-row">
+                    <button type="button" class="demo-btn" onclick="this.closest('dialog').close()">Fechar</button>
+                </div>
+            </dialog>
+        </section>
+
+        <section class="demo-card demo-wide">
+            <h2>Eventos</h2>
+            <p>
+                <code>change</code>, <code>selectmodal:open</code>, <code>selectmodal:close</code>,
+                <code>selectmodal:action</code> e <code>selectmodal:create</code>.
+            </p>
+            <pre class="demo-log" id="log" aria-live="polite"></pre>
+        </section>
+    </div>
+</main>
+
+<script src="select-modal.js"></script>
+<script>
+    // Os selects com a classe .select-modal são inicializados sozinhos quando a página termina de carregar.
+    SelectModal.debug = true; // avisos extras no console durante o desenvolvimento
+
+    // --- Dados remotos: API simulada (troque por fetch, ou use data-source="/api/usuarios?q={query}")
+    var NOMES = ['Ana', 'Bruno', 'Carla', 'Diego', 'Elisa', 'Fábio', 'Gabriela', 'Heitor', 'Íris', 'João',
+        'Karen', 'Lucas', 'Marina', 'Nuno', 'Olívia', 'Paulo', 'Quésia', 'Rafael', 'Sofia', 'Tiago'];
+    var SOBRENOMES = ['Almeida', 'Barbosa', 'Cardoso', 'Dias', 'Esteves', 'Ferreira', 'Gomes', 'Lima',
+        'Martins', 'Nogueira', 'Oliveira', 'Pereira', 'Queiroz', 'Rocha', 'Souza', 'Teixeira'];
+    var USUARIOS = [];
+    NOMES.forEach(function (nome, i) {
+        SOBRENOMES.forEach(function (sobrenome, j) {
+            USUARIOS.push({ id: i * 100 + j, name: nome + ' ' + sobrenome, subtext: (nome + '.' + sobrenome).toLowerCase() + '@exemplo.com' });
+        });
+    });
+    function semAcento(texto) {
+        return texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    }
+    SelectModal.get('#usuario', {
+        minQueryLength: 2,
+        source: function (query, context) {
+            return new Promise(function (resolve, reject) {
+                var timer = setTimeout(function () {
+                    var q = semAcento(query);
+                    resolve(USUARIOS.filter(function (u) { return semAcento(u.name).indexOf(q) !== -1; }).slice(0, 50));
+                }, 400);
+                // Requisições antigas são canceladas quando o usuário continua digitando.
+                context.signal.addEventListener('abort', function () {
+                    clearTimeout(timer);
+                    reject(new DOMException('Aborted', 'AbortError'));
+                });
+            });
+        }
+    });
+
+    // --- Imagens: um avatar (SVG) por opção via data-image
+    var CORES = ['#2563eb', '#16a34a', '#dc2626', '#d97706'];
+    Array.prototype.forEach.call(document.querySelectorAll('#membro option[value]:not([value=""])'), function (option, i) {
+        var svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='12' fill='" + CORES[i % 4]
+            + "'/><text x='12' y='16.5' font-size='12' font-family='sans-serif' font-weight='700' text-anchor='middle' fill='white'>"
+            + option.textContent.charAt(0) + '</text></svg>';
+        option.setAttribute('data-image', 'data:image/svg+xml,' + encodeURIComponent(svg));
+    });
+
+    // --- renderOption: devolve um Node com o conteúdo do item
+    SelectModal.get('#cor', {
+        liveSearch: false,
+        renderOption: function (item) {
+            var row = document.createElement('span');
+            row.style.cssText = 'display:flex;align-items:center;gap:.625rem';
+            var swatch = document.createElement('span');
+            swatch.style.cssText = 'width:1.125rem;height:1.125rem;border-radius:50%;background:' + item.value;
+            row.append(swatch, item.text);
+            return row;
+        }
+    });
+
+    // --- Lista grande
+    (function () {
+        var html = '<option value=""></option>';
+        for (var i = 1; i <= 20000; i++) html += '<option value="' + i + '">Produto ' + String(i).padStart(5, '0') + '</option>';
+        document.getElementById('grande').innerHTML = html;
+    })();
+
+    // --- Idioma
+    document.querySelectorAll('[data-locale]').forEach(function (button) {
+        button.addEventListener('click', function () { SelectModal.locale(button.dataset.locale); });
+    });
+
+    // --- Log de eventos
+    var log = document.getElementById('log');
+    function write(text) {
+        log.textContent = new Date().toLocaleTimeString() + '  ' + text + '\n' + log.textContent;
+    }
+    ['change', 'selectmodal:open', 'selectmodal:close', 'selectmodal:action', 'selectmodal:create'].forEach(function (name) {
+        document.addEventListener(name, function (event) {
+            if (event.target.tagName !== 'SELECT') return;
+            var select = event.target;
+            var value = select.multiple
+                ? JSON.stringify(Array.from(select.selectedOptions, function (o) { return o.value; }))
+                : JSON.stringify(select.value);
+            var detail = event.detail ? '  detail=' + JSON.stringify(event.detail) : '';
+            write('#' + select.id + '  ' + name + '  value=' + value + detail);
+        });
+    });
+
+    // --- Ação "novo cliente": cria a opção com o texto digitado na busca
+    var cliente = document.getElementById('cliente');
+    cliente.addEventListener('selectmodal:action', function (event) {
+        var name = event.detail.query || prompt('Nome do novo cliente:');
+        if (!name) {
+            SelectModal.get(cliente).val('');
+            return;
+        }
+        var option = new Option(name, 'novo-' + Date.now(), true, true);
+        cliente.add(option);
+        SelectModal.get(cliente).refresh();
+    });
+
+    // --- Formulário
+    document.getElementById('form-demo').addEventListener('submit', function (event) {
+        event.preventDefault();
+        write('form enviado: plano=' + new FormData(event.target).get('plano'));
+    });
+
+    // --- API
+    var apiSelect = document.getElementById('api');
+    var api = SelectModal.get(apiSelect, { title: 'Frutas', liveSearchPlaceholder: 'Buscar fruta…' });
+    document.querySelectorAll('[data-api]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            switch (button.dataset.api) {
+                case 'open': api.open(); break;
+                case 'val': api.val('uva'); break;
+                case 'add':
+                    // Opções adicionadas/removidas são detectadas sozinhas (MutationObserver).
+                    apiSelect.add(new Option('Fruta ' + (apiSelect.options.length), 'f' + apiSelect.options.length));
+                    break;
+                case 'toggle': apiSelect.disabled = !apiSelect.disabled; break;
+                case 'destroy':
+                    if (SelectModal.instance(apiSelect)) {
+                        api.destroy();
+                        button.textContent = 'get()';
+                    } else {
+                        api = SelectModal.get(apiSelect, { title: 'Frutas' });
+                        button.textContent = 'destroy()';
+                    }
+                    break;
+            }
+        });
+    });
+
+    // --- Dialog externo
+    document.getElementById('open-dialog').addEventListener('click', function () {
+        document.getElementById('outer-dialog').showModal();
+    });
+
+    // --- Alternadores da página
+    function go(key, value) {
+        var params = new URLSearchParams(location.search);
+        if (value) params.set(key, value); else params.delete(key);
+        location.search = params.toString();
+    }
+    var root = document.documentElement;
+    var uiButton = document.getElementById('toggle-ui');
+    uiButton.setAttribute('aria-pressed', String(root.dataset.ui === 'bootstrap'));
+    uiButton.addEventListener('click', function () {
+        go('ui', root.dataset.ui === 'bootstrap' ? '' : 'bootstrap');
+    });
+    document.getElementById('toggle-theme').addEventListener('click', function () {
+        var dark = root.dataset.theme
+            ? root.dataset.theme === 'dark'
+            : matchMedia('(prefers-color-scheme: dark)').matches;
+        go('theme', dark ? 'light' : 'dark');
+    });
+</script>
+</body>
+</html>
